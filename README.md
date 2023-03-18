@@ -56,14 +56,14 @@ However, for the compile of the Xenomai patched kernel, the method of directly m
 ~/rpi-kernel/linux$ make menuconfig
 ```  
 #### In menuconfig, modify following options.  
-**<span style="color: #6262F1">G</span>eneral setup --->**
+**<span style="color: #6262F1">G</span>eneral setup --->**  
 　↳ **(-v7l-ipipe) <span style="color: #6262F1">L</span>ocal version - append to kernel release**  
 　　You can append text in kernel version string. (Optional)  
-**<span style="color: #6262F1">K</span>ernel Features --->**
-　↳ **<span style="color: #6262F1">T</span>imer Frequency (100 Hz) --->**
+**<span style="color: #6262F1">K</span>ernel Features --->**  
+　↳ **<span style="color: #6262F1">T</span>imer Frequency (100 Hz) --->**  
 　　Select "1000 Hz"  
 **[*] <span style="color: #6262F1">X</span>enomai/cobalt --->**  
-　↳ **<span style="color: #6262F1">C</span>ore features --->**
+　↳ **<span style="color: #6262F1">C</span>ore features --->**  
 　　↳ **(1000) <span style="color: #6262F1">R</span>ound-robin quantum (us) --->**  
 　　　Set to '1' (Not sure if it works.)  
 
