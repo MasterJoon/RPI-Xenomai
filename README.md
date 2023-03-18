@@ -14,12 +14,11 @@ I used WSL (Ubuntu 20.04) in windows 11 PC for Raspberry Pi kernel compiling.
 ~$ sudo apt-get install gdb-multiarch
 ```  
 
-## 2) Download Raspberry Pi Kerenl source and compile tools, and so on.
+## 2) Download Raspberry Pi Kerenl source, Xenomai source and patch files.
 ```sh
 ~$ mkdir ./rpi-kernel
 ~$ cd rpi-kernel/
 ~/rpi-kernel$ git clone https://github.com/raspberrypi/linux.git
-~/rpi-kernel$ git clone https://github.com/raspberrypi/tools.git
 ~/rpi-kernel$ git clone https://github.com/MasterJoon/RPI-Xenomai.git
 ~/rpi-kernel$ wget https://source.denx.de/Xenomai/xenomai/-/archive/v3.2.1/xenomai-v3.2.1.tar.bz2
 ~/rpi-kernel$ tar xjvf xenomai-v3.2.1.tar.bz2
@@ -43,7 +42,7 @@ I used WSL (Ubuntu 20.04) in windows 11 PC for Raspberry Pi kernel compiling.
 ## 5) Export variable for kernel compile.
 ```sh
 ~/rpi-kernel/linux$ export ARCH=arm
-~/rpi-kernel/linux$ export CROSS_COMPILE=~/rpi-kernel/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-
+~/rpi-kernel/linux$ export CROSS_COMPILE=arm-linux-gnueabihf-
 ~/rpi-kernel/linux$ export INSTALL_MOD_PATH=~/rpi-kernel/rt-kernel
 ~/rpi-kernel/linux$ export INSTALL_DTBS_PATH=~/rpi-kernel/rt-kernel
 ```  
