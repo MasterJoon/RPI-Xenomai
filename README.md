@@ -193,13 +193,11 @@ raspberrypi~/xenomai-v3.2.1$ sudo make install
 ```sh
 raspberrypi~$ tar xzvf rt-kernel.tgz
 raspberrypi~$ cd rt-kernel/boot/
-raspberrypi~/rt-kernel/boot$ sudo cp -rd * /boot
+raspberrypi~/rt-kernel/boot$ sudo cp * /boot
 raspberrypi~/rt-kernel/boot$ cd ../lib/
 raspberrypi~/rt-kernel/lib$ sudo cp -dr * /lib
 raspberrypi~/rt-kernel/lib$ cd ../overlays/
-raspberrypi~/rt-kernel/overlays$ sudo cp -d * /boot/overlays
-raspberrypi~/rt-kernel/overlays$ cd ..
-raspberrypi~/rt-kernel$ sudo cp -d bcm* /boot
+raspberrypi~/rt-kernel/overlays$ sudo cp * /boot/overlays
 raspberrypi~/rt-kernel$ sync
 raspberrypi~/rt-kernel$ cd ..
 ```  
