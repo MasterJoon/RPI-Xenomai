@@ -10,6 +10,7 @@ I used WSL (Ubuntu 20.04) in windows 11 PC for Raspberry Pi kernel compiling.
 ```sh
 ~$ sudo apt-get install git bc bison flex libssl-dev make
 ~$ sudo apt-get install build-essential libncurses5-dev
+~$ sudo apt-get install autoconf automake libtool
 ~$ sudo apt-get install g++-arm-linux-gnueabihf
 ~$ sudo apt-get install gdb-multiarch
 ```  
@@ -32,11 +33,60 @@ I used WSL (Ubuntu 20.04) in windows 11 PC for Raspberry Pi kernel compiling.
 ~/rpi-kernel/linux$ patch -p1 < ../RPI-Xenomai/ipipe-core-4.19.82-arm-6-mod-4.49.86.patch
 ~/rpi-kernel/linux$ ../xenomai-v3.2.1/scripts/prepare-kernel.sh --arch=arm --linux=./
 ```  
+### 3-1) USB patch in Raspberry Pi 4b rev. 1.5  
+- In the new version of Raspberry Pi 4b (rev. 1.5), the USB 3.0 driver module is not working from kernel 4.19.  
+- After April 2021(after kernel ver. 5.4), Raspberry Pi 4 kernel find USB 3.0 driver(VL805) firmware from the EEPROM once at the initial stage of booting. unless the driver firmware is valid, the kernel use the module driver(xhci_hcd) in the kernel source codes.
+- After googled about this problem, I found the solution in the [Raspberry Pi kernel github issuses](https://github.com/raspberrypi/linux/issues/3713). from *pelwell*'s reply in 4th, I found the [changed source](https://github.com/raspberrypi/linux/commit/c74b1b53254016fd83b580b8d49bb02d72ce4836) about the loading VL805 firmware from EEPROM.  
+### **/drivers/usb/host/pci-quirks.c**  
+>add at 21 line
+```c
+#include <soc/bcm2835/raspberrypi-firmware.h>
+```  
+>add at 631 line
+```c
+/* The VL805 firmware may either be loaded from an EEPROM or by the BIOS into
+ * memory. If run from memory it must be reloaded after a PCI fundmental reset.
+ * The Raspberry Pi firmware acts as the BIOS in this case.
+ */
+static void usb_vl805_init(struct pci_dev *pdev)
+{
+#if IS_ENABLED(CONFIG_RASPBERRYPI_FIRMWARE)
+	struct rpi_firmware *fw;
+	struct {
+		u32 dev_addr;
+	} packet;
+	int ret;
+
+	fw = rpi_firmware_get(NULL);
+	if (!fw)
+		return;
+
+	packet.dev_addr = (pdev->bus->number << 20) |
+		(PCI_SLOT(pdev->devfn) << 15) | (PCI_FUNC(pdev->devfn) << 12);
+
+	dev_dbg(&pdev->dev, "RPI_FIRMWARE_NOTIFY_XHCI_RESET %x", packet.dev_addr);
+	ret = rpi_firmware_property(fw, RPI_FIRMWARE_NOTIFY_XHCI_RESET,
+			&packet, sizeof(packet));
+#endif
+}
+
+```  
+>add at 1240 line
+```c
+	if (pdev->vendor == PCI_VENDOR_ID_VIA && pdev->device == 0x3483)
+		usb_vl805_init(pdev);
+```  
+### **include/soc/bcm2835/raspberrypi-firmware.h**
+>add at 101 line
+```c
+	RPI_FIRMWARE_NOTIFY_XHCI_RESET =                      0x00030058,
+```  
 
 ## 4) Create kernel compile destination directory.
 ```sh
 ~/rpi-kernel/linux$ mkdir ../rt-Kernel
 ~/rpi-kernel/linux$ mkdir ../rt-kernel/boot
+~/rpi-kernel/linux$ mkdir ../rt-kernel/overlays
 ```  
 
 ## 5) Export variable for kernel compile.
@@ -49,9 +99,14 @@ I used WSL (Ubuntu 20.04) in windows 11 PC for Raspberry Pi kernel compiling.
 
 ## 6) Kernel compile configuration and compile.
 In the compile process of a general Raspberry Pi kernel, a default configuration file is created with the ```make bcm2711_defconfig``` command using the **arch/arm/configs/bcm2711_defconfig** file (.config), and then the compile settings are additionally modified through the ```make menuconfig``` command.  
-However, for the compile of the Xenomai patched kernel, the method of directly modifying the compile setting was not successful. So, I used the method of directly copying the configuration file from the pre-built kernel distributed on the [Simplerobot](https://github.com/thanhtam-h/rpi4-xeno3) site and using it as it is.  
+However, for the compile of the Xenomai patched kernel, the method of directly modifying the compile setting was not successful. So, I used the method of get the config file from the general kernel in Raspberry Pi OS directly. you can get the config file in the raspberry pi shell.  
 ```sh
-~/rpi-kernel/linux$ cp ../RPI-Xenomai/config-4.19.86-v7l-ipipe .config
+raspberrypi~$ sudo modprobe configs
+raspberrypi~$ zcat /proc/config.gz > ./config-rpi4
+```  
+After transfering the config-rpi4 file to the host PC, copy to the linux folder named to *.config*.
+```sh
+~/rpi-kernel/linux$ cp ../config-rpi4 ./.config
 ~/rpi-kernel/linux$ make menuconfig
 ```  
 #### In menuconfig, modify following options.  
@@ -61,23 +116,38 @@ However, for the compile of the Xenomai patched kernel, the method of directly m
 **<span style="color: #6262F1">K</span>ernel Features --->**  
 　↳ **<span style="color: #6262F1">T</span>imer Frequency (100 Hz) --->**  
 　　Select "1000 Hz"  
+**<span style="color: #6262F1">C</span>PU Power Management --->**  
+　↳ **<span style="color: #6262F1">C</span>PU Frequency scaling --->**  
+　　↳ **[ ] <span style="color: #6262F1">C</span>PU Frequency scaling --->**  
+　　　Disable  
 **[*] <span style="color: #6262F1">X</span>enomai/cobalt --->**  
 　↳ **<span style="color: #6262F1">C</span>ore features --->**  
 　　↳ **(1000) <span style="color: #6262F1">R</span>ound-robin quantum (us) --->**  
 　　　Set to '1' (Not sure if it works.)  
+**M<span style="color: #6262F1">e</span>mory Management options --->**  
+　↳ **[ ] <span style="color: #6262F1">A</span>llow for memory compaction**  
+　　Disable  
+　↳ **[ ] <span style="color: #6262F1">C</span>ontiguous Memory Allocator**  
+　　Disable  
+**<span style="color: #6262F1">K</span>ernel hacking --->**  
+　↳ **[ ] <span style="color: #6262F1">K</span>GDB: kernel debugger --->**  
+　　Disable  
 
 ```sh
 ~/rpi-kernel/linux$ make -j4 zImage
 ~/rpi-kernel/linux$ make -j4 modules
 ~/rpi-kernel/linux$ make -j4 dtbs
 ~/rpi-kernel/linux$ make -j4 module_install
-~/rpi-kernel/linux$ make -j4 dtbs_install
-~/rpi-kernel/linux$ ./scripts/mkknlimg ./arch/arm/boot/zImage$INSTALL_MOD_PATH/boot/kernel7-xeno.img
+~/rpi-kernel/linux$ cp arch/arm/boot/dts/*.dtb ../rt-kernel/boot/
+~/rpi-kernel/linux$ cp arch/arm/boot/dts/overlays/*.dtb* ../rt-kernel/overlays/
+~/rpi-kernel/linux$ cp arch/arm/boot/dts/overlays/README ../rt-kernel/overlays/
+~/rpi-kernel/linux$ cp arch/arm/boot/zImage ../rt-kernel/boot/kernel7-xeno.img
 ~/rpi-kernel/linux$ cd ..
 ~/rpi-kernel$ tar czvf rt-kernel.tgz ./rt-kernel/
 ```  
 
-## 7) Compile Xenoami Library
+## 7) Compile Xenomai Library
+### 7-1) Cross compile
 ```sh
 ~/rpi-kernel$ cd xenomai-v3.2.1/
 ~/rpi-kernel/xenomai-v3.2.1$ ./scripts/bootstrap
@@ -100,6 +170,17 @@ File Name to Write: configure -> Enter
 ~/rpi-kernel/xenomai-v3.2.1$ cd ..
 ~/rpi-kernel$ tar cjvf xeno3-deploy.tar.bz2 /usr/xenomai
 ```  
+### 7-2) Native compile and install in Raspberry Pi
+- In the native compile, there is no error about "FUSE" variable
+```sh
+raspberrypi~$ wget https://source.denx.de/Xenomai/xenomai/-/archive/v3.2.1/xenomai-v3.2.1.tar.bz2
+raspberrypi~$ tar xjvf xenomai-v3.2.1.tar.bz2
+raspberrypi~$ cd xenomai-v3.2.1
+raspberrypi~/xenomai-v3.2.1$ ./scripts/bootstrap
+raspberrypi~/xenomai-v3.2.1$ ./configure --enable-smp --with-core=cobalt
+raspberrypi~/xenomai-v3.2.1$ make
+raspberrypi~/xenomai-v3.2.1$ sudo make install
+```
 
 ## 8) Transfer the kernel file and Xenomai library
 ```sh
@@ -110,38 +191,47 @@ File Name to Write: configure -> Enter
 # In Raspberry Pi
 ## 1) Kernel Change
 ```sh
-~$ tar xzvf rt-kernel.tgz
-~$ cd rt-kernel/boot/
-~/rt-kernel/boot$ sudo cp -rd * /boot
-~/rt-kernel/boot$ cd ../lib/
-~/rt-kernel/lib$ sudo cp -dr * /lib
-~/rt-kernel/lib$ cd ../overlays/
-~/rt-kernel/overlays$ sudo cp -d * /boot/overlays
-~/rt-kernel/overlays$ cd ..
-~/rt-kernel$ sudo cp -d bcm* /boot
-~/rt-kernel$ sync
-~/rt-kernel$ cd ..
-~$ sudo nano /boot/config.txt
+raspberrypi~$ tar xzvf rt-kernel.tgz
+raspberrypi~$ cd rt-kernel/boot/
+raspberrypi~/rt-kernel/boot$ sudo cp -rd * /boot
+raspberrypi~/rt-kernel/boot$ cd ../lib/
+raspberrypi~/rt-kernel/lib$ sudo cp -dr * /lib
+raspberrypi~/rt-kernel/lib$ cd ../overlays/
+raspberrypi~/rt-kernel/overlays$ sudo cp -d * /boot/overlays
+raspberrypi~/rt-kernel/overlays$ cd ..
+raspberrypi~/rt-kernel$ sudo cp -d bcm* /boot
+raspberrypi~/rt-kernel$ sync
+raspberrypi~/rt-kernel$ cd ..
+```  
+```sh
+raspberrypi~$ sudo nano /boot/config.txt
+# Comment out the following line
+dtoverlay=vc4-fkms-v3d
 # Append the following line.
 kernel=kernel7-xeno.img
-~$ sudo nano /boot/cmdline.txt
+total_mem=3072
+```  
+>There is a big issue found on 4G RAM version raspberry pi 4, although LPAE (Large Physical Address Extensions) allows Linux 32 bit can access fully 4G memory, the pcie DMA controller can only access up to 3G RAM. This usually causes problem for USB hub (connected via pcie) especially when user set large GPU memory (GPU always use low memory portion). This become serious on ipipe kernel. Workaround for this issue is to limit usable memory to 3G, add "total_mem=3072" in **/boot/config.txt** file.  
+In Addition, OpenGL drive is not working. in order to get the HDMI display, comment out the line "dtoverlay=vc4-fkms-v3d".  
+```sh
+raspberrypi~$ sudo nano /boot/cmdline.txt
 # Append the following line in a single line.
 dwc_otg.fiq_enable=0 dwc_otg.fiq_fsm_enable=0 dwc_otg.nak_holdoff=0 isolcpus=0,1 xenomai.supported_cpus=0x3
 ```  
 
 ## 2) Install Xenoamai library
 ```sh
-~$ sudo tar -xjvf xeno3-deploy.tar.bz2 -C /
-~$ sudo nano /etc/ld.so.conf.d/xenomai.conf
+raspberrypi~$ sudo tar -xjvf xeno3-deploy.tar.bz2 -C /
+raspberrypi~$ sudo nano /etc/ld.so.conf.d/xenomai.conf
 # Append the following lines.
 # xenomai lib path
 /usr/local/lib
 /usr/xenomai/lib
-~$ sudo ldconfig
-~$ sudo reboot
+raspberrypi~$ sudo ldconfig
+raspberrypi~$ sudo reboot
 ```  
 
 # Xenomai Latency Test
 ```sh
-~$ sudo /usr/xenomai/bin/latency
+raspberrypi~$ sudo /usr/xenomai/bin/latency
 ```  
