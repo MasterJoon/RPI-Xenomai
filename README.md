@@ -201,16 +201,13 @@ raspberrypi~/rt-kernel/overlays$ sudo cp * /boot/overlays
 raspberrypi~/rt-kernel$ sync
 raspberrypi~/rt-kernel$ cd ..
 ```  
+>There is a big issue found on 4G RAM version raspberry pi 4, although LPAE (Large Physical Address Extensions) allows Linux 32 bit can access fully 4G memory, the pcie DMA controller can only access up to 3G RAM. This usually causes problem for USB hub (connected via pcie) especially when user set large GPU memory (GPU always use low memory portion). This become serious on ipipe kernel. Workaround for this issue is to limit usable memory to 3G, add "total_mem=3072" in **/boot/config.txt** file.  
 ```sh
 raspberrypi~$ sudo nano /boot/config.txt
-# Comment out the following line
-dtoverlay=vc4-fkms-v3d
 # Append the following line.
 kernel=kernel7-xeno.img
 total_mem=3072
 ```  
->There is a big issue found on 4G RAM version raspberry pi 4, although LPAE (Large Physical Address Extensions) allows Linux 32 bit can access fully 4G memory, the pcie DMA controller can only access up to 3G RAM. This usually causes problem for USB hub (connected via pcie) especially when user set large GPU memory (GPU always use low memory portion). This become serious on ipipe kernel. Workaround for this issue is to limit usable memory to 3G, add "total_mem=3072" in **/boot/config.txt** file.  
-In Addition, OpenGL drive is not working. in order to get the HDMI display, comment out the line "dtoverlay=vc4-fkms-v3d".  
 ```sh
 raspberrypi~$ sudo nano /boot/cmdline.txt
 # Append the following line in a single line.
