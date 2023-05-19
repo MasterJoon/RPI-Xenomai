@@ -230,3 +230,45 @@ raspberrypi~$ sudo reboot
 ```sh
 raspberrypi~$ sudo /usr/xenomai/bin/latency
 ```  
+
+# Using Xenomai Program in User Mode (without "sudo")  
+> When you execute the xenomai library based program, you will be encounter the **Permission** problem. to solve this, Xenomai group must be added.  
+```sh
+raspberrypi~$ sudo addgroup xenomai --gid 1234
+raspberrypi~$ sudo addgroup root xenomai
+raspberrypi~$ sudo usermod -a -G xenomai $USER
+```  
+> After adding xenomai group, update the kernel command line  
+```sh
+raspberrypi~$ sudo nano /boot/cmdline.txt
+# append the following line in single line
+xenomai.allowed_group=1234
+```  
+> Lastly, update udev files in the system directory  
+```sh
+raspberrypi~$ sudo cp /usr/xenomai/etc/udev/rules.d/* /etc/udev/rules.d/
+raspberrypi~$ sudo reboot
+```  
+> After reboot, when you try to execute xenomai example program in normal mode(/usr/xenomai/bin/latency), you will be find another **Permission** problem about ***/dev/mem***.  
+/dev/mem is the device module driver associate with accessing the processor register address. I think, the xenomai kernel is using this module because of the ipipe interrupt patches.  
+Anyway, to avoid this problem, you can simply change the owner of /dev/mem to 'pi' user. the default owner of that is 'kmem', you can check the ls -l command.
+```sh
+raspberrypi~$ ls -l /dev/mem
+crw-r----- 1 root kmem 1, 1 May 19 13:10 /dev/mem
+```  
+> To change the owner of that, use 'chown' command.  
+```sh
+raspberrypi~$ sudo chown root:pi /dev/mem
+```  
+> It's over now. from now on, you can execute the xenomai program in normal mode.  
+```sh
+raspberrypi~$ /usr/xenomai/bin/latency
+== Sampling period: 1000 us
+== Test mode: periodic user-mode task
+== All results in microseconds
+warming up...
+RTT|  00:00:01  (periodic user-mode task, 1000 us period, priority 99)
+RTH|----lat min|----lat avg|----lat max|-overrun|---msw|---lat best|--lat worst
+RTD|      2.395|      3.440|     17.083|       0|     0|      2.395|     17.083
+RTD|      1.822|      3.130|     17.083|       0|     0|      1.822|     17.083
+```
