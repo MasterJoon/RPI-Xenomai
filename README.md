@@ -137,7 +137,7 @@ After transfering the config-rpi4 file to the host PC, copy to the linux folder 
 ~/rpi-kernel/linux$ make -j4 zImage
 ~/rpi-kernel/linux$ make -j4 modules
 ~/rpi-kernel/linux$ make -j4 dtbs
-~/rpi-kernel/linux$ make -j4 module_install
+~/rpi-kernel/linux$ make -j4 modules_install
 ~/rpi-kernel/linux$ cp arch/arm/boot/dts/*.dtb ../rt-kernel/boot/
 ~/rpi-kernel/linux$ cp arch/arm/boot/dts/overlays/*.dtb* ../rt-kernel/overlays/
 ~/rpi-kernel/linux$ cp arch/arm/boot/dts/overlays/README ../rt-kernel/overlays/
