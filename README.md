@@ -199,11 +199,16 @@ raspberrypi~/rt-kernel/boot$ cd ../lib/
 raspberrypi~/rt-kernel/lib$ sudo cp -dr * /lib
 raspberrypi~/rt-kernel/lib$ cd ../overlays/
 raspberrypi~/rt-kernel/overlays$ sudo cp * /boot/overlays
-raspberrypi~/rt-kernel$ sync
-raspberrypi~/rt-kernel$ cd ..
+raspberrypi~/rt-kernel/overlays$ sync
+raspberrypi~/rt-kernel/overlays$ cd ../..
+```  
+>If you use CM4 board, you need to delete the device tree file **bcm2711-rpi-cm4.dtb** in the **/boot** directory.  
+```sh
+raspberrypi~$ sudo rm /boot/bcm2711-rpi-cm4.dtb
 ```  
 >There is a big issue found on 4G RAM version raspberry pi 4, although LPAE (Large Physical Address Extensions) allows Linux 32 bit can access fully 4GB memory, the pcie DMA controller can only access up to 3GB RAM. This usually causes problem for USB3.0 hub (VL805 chipset connected via PCIe) especially when user set large GPU memory (GPU always use low memory portion). This become serious on ipipe kernel. Workaround for this issue is to limit usable memory to 3GB, add **"total_mem=3072"** in **/boot/config.txt** file.  
-if you use CM4 and, the expansion board use the internal USB2.0 hub instead of VL805, **"total_mem=3072"** line is not necessary. but in this case, you need to enable the internal USB2.0 function adding the line **"dtoverlay=dwc2,dr_mode=host"**.
+
+>if you use CM4 and, the expansion board use the internal USB2.0 hub instead of VL805, **"total_mem=3072"** line is not necessary. but in this case, you need to enable the internal USB2.0 function adding the line **"dtoverlay=dwc2,dr_mode=host"**.
 ```sh
 raspberrypi~$ sudo nano /boot/config.txt
 # Append the following line.
