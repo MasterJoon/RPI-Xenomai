@@ -111,27 +111,27 @@ After transfering the config-rpi4 file to the host PC, copy to the linux folder 
 ```  
 #### In menuconfig, modify following options.  
 **<span style="color: #6262F1">G</span>eneral setup --->**  
-ã€€â†³ **(-v7l-ipipe) <span style="color: #6262F1">L</span>ocal version - append to kernel release**  
-ã€€ã€€You can append text in kernel version string. (Optional)  
+????†³ **(-v7l-ipipe) <span style="color: #6262F1">L</span>ocal version - append to kernel release**  
+??????You can append text in kernel version string. (Optional)  
 **<span style="color: #6262F1">K</span>ernel Features --->**  
-ã€€â†³ **<span style="color: #6262F1">T</span>imer Frequency (100 Hz) --->**  
-ã€€ã€€Select "1000 Hz"  
+????†³ **<span style="color: #6262F1">T</span>imer Frequency (100 Hz) --->**  
+??????Select "1000 Hz"  
 **<span style="color: #6262F1">C</span>PU Power Management --->**  
-ã€€â†³ **<span style="color: #6262F1">C</span>PU Frequency scaling --->**  
-ã€€ã€€â†³ **[ ] <span style="color: #6262F1">C</span>PU Frequency scaling --->**  
-ã€€ã€€ã€€Disable  
+????†³ **<span style="color: #6262F1">C</span>PU Frequency scaling --->**  
+???????†³ **[ ] <span style="color: #6262F1">C</span>PU Frequency scaling --->**  
+?????????Disable  
 **[*] <span style="color: #6262F1">X</span>enomai/cobalt --->**  
-ã€€â†³ **<span style="color: #6262F1">C</span>ore features --->**  
-ã€€ã€€â†³ **(1000) <span style="color: #6262F1">R</span>ound-robin quantum (us) --->**  
-ã€€ã€€ã€€Set to '1' (Not sure if it works.)  
+????†³ **<span style="color: #6262F1">C</span>ore features --->**  
+???????†³ **(1000) <span style="color: #6262F1">R</span>ound-robin quantum (us) --->**  
+?????????Set to '1' (Not sure if it works.)  
 **M<span style="color: #6262F1">e</span>mory Management options --->**  
-ã€€â†³ **[ ] <span style="color: #6262F1">A</span>llow for memory compaction**  
-ã€€ã€€Disable  
-ã€€â†³ **[ ] <span style="color: #6262F1">C</span>ontiguous Memory Allocator**  
-ã€€ã€€Disable  
+????†³ **[ ] <span style="color: #6262F1">A</span>llow for memory compaction**  
+??????Disable  
+????†³ **[ ] <span style="color: #6262F1">C</span>ontiguous Memory Allocator**  
+??????Disable  
 **<span style="color: #6262F1">K</span>ernel hacking --->**  
-ã€€â†³ **[ ] <span style="color: #6262F1">K</span>GDB: kernel debugger --->**  
-ã€€ã€€Disable  
+????†³ **[ ] <span style="color: #6262F1">K</span>GDB: kernel debugger --->**  
+??????Disable  
 
 ```sh
 ~/rpi-kernel/linux$ make -j4 zImage
@@ -141,7 +141,7 @@ After transfering the config-rpi4 file to the host PC, copy to the linux folder 
 ~/rpi-kernel/linux$ cp arch/arm/boot/dts/*.dtb ../rt-kernel/boot/
 ~/rpi-kernel/linux$ cp arch/arm/boot/dts/overlays/*.dtb* ../rt-kernel/overlays/
 ~/rpi-kernel/linux$ cp arch/arm/boot/dts/overlays/README ../rt-kernel/overlays/
-~/rpi-kernel/linux$ cp arch/arm/boot/zImage ../rt-kernel/boot/kernel7-xeno.img
+~/rpi-kernel/linux$ cp arch/arm/boot/zImage ../rt-kernel/boot/kernel7l-xeno.img
 ~/rpi-kernel/linux$ cd ..
 ~/rpi-kernel$ tar czvf rt-kernel.tgz ./rt-kernel/
 ```  
@@ -161,7 +161,7 @@ Comparing Xenoami-3.1 configure file, I found the solution. just remove a line u
 ^W (Ctrl + w)
 Search: FUSE,
 Add '#' before 'PKG_CHECK_MODULES(FUSE, fuse)'
-  â†³ #PKG_CHECK_MODULES(FUSE, fuse)
+  ?†³ #PKG_CHECK_MODULES(FUSE, fuse)
 ^O (Ctrl + o)
 File Name to Write: configure -> Enter
 ^X (Ctrl + x)
@@ -212,7 +212,7 @@ raspberrypi~$ sudo rm /boot/bcm2711-rpi-cm4.dtb
 ```sh
 raspberrypi~$ sudo nano /boot/config.txt
 # Append the following line.
-kernel=kernel7-xeno.img
+kernel=kernel7l-xeno.img
 total_mem=3072
 dtoverlay=dwc2,dr_mode=host
 ```  
