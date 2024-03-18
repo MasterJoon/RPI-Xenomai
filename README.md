@@ -111,27 +111,27 @@ After transfering the config-rpi4 file to the host PC, copy to the linux folder 
 ```  
 #### In menuconfig, modify following options.  
 **<span style="color: #6262F1">G</span>eneral setup --->**  
-????†³ **(-v7l-ipipe) <span style="color: #6262F1">L</span>ocal version - append to kernel release**  
-??????You can append text in kernel version string. (Optional)  
+¡¡? **(-v7l-ipipe) <span style="color: #6262F1">L</span>ocal version - append to kernel release**  
+¡¡¡¡You can append text in kernel version string. (Optional)  
 **<span style="color: #6262F1">K</span>ernel Features --->**  
-????†³ **<span style="color: #6262F1">T</span>imer Frequency (100 Hz) --->**  
-??????Select "1000 Hz"  
+¡¡? **<span style="color: #6262F1">T</span>imer Frequency (100 Hz) --->**  
+¡¡¡¡Select "1000 Hz"  
 **<span style="color: #6262F1">C</span>PU Power Management --->**  
-????†³ **<span style="color: #6262F1">C</span>PU Frequency scaling --->**  
-???????†³ **[ ] <span style="color: #6262F1">C</span>PU Frequency scaling --->**  
-?????????Disable  
+¡¡? **<span style="color: #6262F1">C</span>PU Frequency scaling --->**  
+¡¡¡¡? **[ ] <span style="color: #6262F1">C</span>PU Frequency scaling --->**  
+¡¡¡¡¡¡Disable  
 **[*] <span style="color: #6262F1">X</span>enomai/cobalt --->**  
-????†³ **<span style="color: #6262F1">C</span>ore features --->**  
-???????†³ **(1000) <span style="color: #6262F1">R</span>ound-robin quantum (us) --->**  
-?????????Set to '1' (Not sure if it works.)  
+¡¡? **<span style="color: #6262F1">C</span>ore features --->**  
+¡¡¡¡? **(1000) <span style="color: #6262F1">R</span>ound-robin quantum (us) --->**  
+¡¡¡¡¡¡Set to '1' (Not sure if it works.)  
 **M<span style="color: #6262F1">e</span>mory Management options --->**  
-????†³ **[ ] <span style="color: #6262F1">A</span>llow for memory compaction**  
-??????Disable  
-????†³ **[ ] <span style="color: #6262F1">C</span>ontiguous Memory Allocator**  
-??????Disable  
+¡¡? **[ ] <span style="color: #6262F1">A</span>llow for memory compaction**  
+¡¡¡¡Disable  
+¡¡? **[ ] <span style="color: #6262F1">C</span>ontiguous Memory Allocator**  
+¡¡¡¡Disable  
 **<span style="color: #6262F1">K</span>ernel hacking --->**  
-????†³ **[ ] <span style="color: #6262F1">K</span>GDB: kernel debugger --->**  
-??????Disable  
+¡¡? **[ ] <span style="color: #6262F1">K</span>GDB: kernel debugger --->**  
+¡¡¡¡Disable  
 
 ```sh
 ~/rpi-kernel/linux$ make -j4 zImage
@@ -161,7 +161,7 @@ Comparing Xenoami-3.1 configure file, I found the solution. just remove a line u
 ^W (Ctrl + w)
 Search: FUSE,
 Add '#' before 'PKG_CHECK_MODULES(FUSE, fuse)'
-  ?†³ #PKG_CHECK_MODULES(FUSE, fuse)
+  ? #PKG_CHECK_MODULES(FUSE, fuse)
 ^O (Ctrl + o)
 File Name to Write: configure -> Enter
 ^X (Ctrl + x)
