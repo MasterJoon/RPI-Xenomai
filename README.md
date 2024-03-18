@@ -111,27 +111,27 @@ After transfering the config-rpi4 file to the host PC, copy to the linux folder 
 ```  
 #### In menuconfig, modify following options.  
 **<span style="color: #6262F1">G</span>eneral setup --->**  
-¡¡? **(-v7l-ipipe) <span style="color: #6262F1">L</span>ocal version - append to kernel release**  
-¡¡¡¡You can append text in kernel version string. (Optional)  
+  â†³ **(-v7l-ipipe) <span style="color: #6262F1">L</span>ocal version - append to kernel release**  
+ã€€ã€€You can append text in kernel version string. (Optional)  
 **<span style="color: #6262F1">K</span>ernel Features --->**  
-¡¡? **<span style="color: #6262F1">T</span>imer Frequency (100 Hz) --->**  
-¡¡¡¡Select "1000 Hz"  
+  â†³ **<span style="color: #6262F1">T</span>imer Frequency (100 Hz) --->**  
+ã€€ã€€Select "1000 Hz"  
 **<span style="color: #6262F1">C</span>PU Power Management --->**  
-¡¡? **<span style="color: #6262F1">C</span>PU Frequency scaling --->**  
-¡¡¡¡? **[ ] <span style="color: #6262F1">C</span>PU Frequency scaling --->**  
-¡¡¡¡¡¡Disable  
+  â†³ **<span style="color: #6262F1">C</span>PU Frequency scaling --->**  
+ã€€  â†³ **[ ] <span style="color: #6262F1">C</span>PU Frequency scaling --->**  
+ã€€ã€€ã€€Disable  
 **[*] <span style="color: #6262F1">X</span>enomai/cobalt --->**  
-¡¡? **<span style="color: #6262F1">C</span>ore features --->**  
-¡¡¡¡? **(1000) <span style="color: #6262F1">R</span>ound-robin quantum (us) --->**  
-¡¡¡¡¡¡Set to '1' (Not sure if it works.)  
+  â†³ **<span style="color: #6262F1">C</span>ore features --->**  
+ã€€  â†³ **(1000) <span style="color: #6262F1">R</span>ound-robin quantum (us) --->**  
+ã€€ã€€ã€€Set to '1' (Not sure if it works.)  
 **M<span style="color: #6262F1">e</span>mory Management options --->**  
-¡¡? **[ ] <span style="color: #6262F1">A</span>llow for memory compaction**  
-¡¡¡¡Disable  
-¡¡? **[ ] <span style="color: #6262F1">C</span>ontiguous Memory Allocator**  
-¡¡¡¡Disable  
+  â†³ **[ ] <span style="color: #6262F1">A</span>llow for memory compaction**  
+ã€€ã€€Disable  
+  â†³ **[ ] <span style="color: #6262F1">C</span>ontiguous Memory Allocator**  
+ã€€ã€€Disable  
 **<span style="color: #6262F1">K</span>ernel hacking --->**  
-¡¡? **[ ] <span style="color: #6262F1">K</span>GDB: kernel debugger --->**  
-¡¡¡¡Disable  
+  â†³ **[ ] <span style="color: #6262F1">K</span>GDB: kernel debugger --->**  
+ã€€ã€€Disable  
 
 ```sh
 ~/rpi-kernel/linux$ make -j4 zImage
